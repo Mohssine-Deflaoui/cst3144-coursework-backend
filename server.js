@@ -4,6 +4,8 @@ const { MongoClient } = require("mongodb")
 const app = express()
 const port = 3000
 
+app.use(express.json())
+
 const client = new MongoClient(process.env.MONGODB_URI)
 
 async function startServer() {
@@ -26,6 +28,39 @@ async function startServer() {
             const lessons = await lessonsCollection.find({}).toArray()
 
             res.json(lessons)
+
+        })
+
+        app.post("/orders", async (req, res) => {
+
+            try {
+
+                const database = client.db("CST3144")
+                const ordersCollection = database.collection("orders")
+
+                const order = {
+                    name: req.body.name,
+                    phone: req.body.phone,
+                    lessonIDs: req.body.lessonIDs,
+                    spaces: req.body.spaces
+                }
+
+                const result = await ordersCollection.insertOne(order)
+
+                res.status(201).json({
+                    message: "Order saved successfully",
+                    orderId: result.insertedId
+                })
+
+            } catch (error) {
+
+                console.error("Error saving order:", error)
+
+                res.status(500).json({
+                    message: "Failed to save order"
+                })
+
+            }
 
         })
 
