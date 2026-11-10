@@ -1,47 +1,44 @@
 const express = require("express")
+const { MongoClient } = require("mongodb")
 
 const app = express()
-
 const port = 3000
 
+const client = new MongoClient(process.env.MONGODB_URI)
 
-const lessons = [
-    {
-        id: 1001,
-        subject: "Coding Club",
-        location: "Hendon",
-        price: 25,
-        availability: 5
-    },
+async function startServer() {
 
-    {
-        id: 1002,
-        subject: "Maths Club",
-        location: "Colindale",
-        price: 20,
-        availability: 5
-    },
+    try {
 
-    {
-        id: 1003,
-        subject: "Football",
-        location: "Hendon",
-        price: 15,
-        availability: 5
+        await client.connect()
+
+        console.log("Connected to MongoDB Atlas")
+
+        app.get("/", (req, res) => {
+            res.send("CST3144 backend is running")
+        })
+
+        app.get("/lessons", async (req, res) => {
+
+            const database = client.db("CST3144")
+            const lessonsCollection = database.collection("lessons")
+
+            const lessons = await lessonsCollection.find({}).toArray()
+
+            res.json(lessons)
+
+        })
+
+        app.listen(port, () => {
+            console.log(`Server running on http://localhost:${port}`)
+        })
+
+    } catch (error) {
+
+        console.error("MongoDB connection failed:", error)
+
     }
-]
 
+}
 
-app.get("/", (req, res) => {
-    res.send("CST3144 backend is running")
-})
-
-
-app.get("/lessons", (req, res) => {
-    res.json(lessons)
-})
-
-
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`)
-})
+startServer()
