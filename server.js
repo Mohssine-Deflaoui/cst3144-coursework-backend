@@ -64,6 +64,47 @@ async function startServer() {
 
         })
 
+        app.put("/lessons/:id", async (req, res) => {
+
+            try {
+
+                const database = client.db("CST3144")
+                const lessonsCollection = database.collection("lessons")
+
+                const lessonId = parseInt(req.params.id)
+                const newAvailability = req.body.availability
+
+                const result = await lessonsCollection.updateOne(
+                    { id: lessonId },
+                    {
+                        $set: {
+                            availability: newAvailability
+                        }
+                    }
+                )
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({
+                        message: "Lesson not found"
+                    })
+                }
+
+                res.json({
+                    message: "Lesson updated successfully"
+                })
+
+            } catch (error) {
+
+                console.error("Error updating lesson:", error)
+
+                res.status(500).json({
+                    message: "Failed to update lesson"
+                })
+
+            }
+
+        })
+
         app.listen(port, () => {
             console.log(`Server running on http://localhost:${port}`)
         })
