@@ -11,6 +11,14 @@ app.use((req, res, next) => {
     next()
 })
 
+app.use("/images", express.static("images"))
+
+app.use("/images", (req, res) => {
+    res.status(404).json({
+        message: "Image not found"
+    })
+})
+
 const client = new MongoClient(process.env.MONGODB_URI)
 
 async function startServer() {
