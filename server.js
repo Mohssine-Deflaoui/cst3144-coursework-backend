@@ -6,6 +6,11 @@ const port = 3000
 
 app.use(express.json())
 
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`)
+    next()
+})
+
 const client = new MongoClient(process.env.MONGODB_URI)
 
 async function startServer() {
